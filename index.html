@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora DVIR - Driver Vehicle Inspection Report</title>
+  <style>
+    body {
+      font-family: Georgia, serif;
+      background: #f0ece2;
+      margin: 0;
+      padding: 16px 8px;
+      color: #222;
+      line-height: 1.4;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    .header {
+      background: #1a3a5c;
+      padding: 20px 24px;
+      text-align: center;
+      color: white;
+    }
+    .content {
+      padding: 20px 24px;
+    }
+    h2 {
+      background: #1a3a5c;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      margin: 20px 0 10px;
+    }
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .field label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+      white-space: nowrap;
+    }
+    .field input {
+      border: none;
+      border-bottom: 2px solid #1a3a5c;
+      background: transparent;
+      font-size: 13px;
+      padding: 3px 4px;
+      outline: none;
+      font-family: Georgia, serif;
+      flex: 1;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0;
+      border-bottom: 1px solid #e8e0d0;
+    }
+    .btn-small {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #555;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .legend {
+      background: #f0ece2;
+      border: 2px solid #1a3a5c;
+      border-radius: 6px;
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+    .submit-btn {
+      background: #1a3a5c;
+      color: white;
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    canvas {
+      border: 2px solid #1a3a5c;
+      border-radius: 4px;
+      background: #f9f7f2;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div style="font-size:10px; color:#a0b8d0; letter-spacing:2px; text-transform:uppercase;">As Required by D.O.T. Federal Motor Carrier Safety Regulations</div>
+      <div style="font-size:21px; font-weight:bold; margin-top:4px;">Aurora DVIR</div>
+      <div style="font-size:13px; color:#c8daea;">Driver's Vehicle Inspection Report — Aurora Cooperative</div>
+    </div>
+
+    <div class="content">
+
+      <!-- Basic Info -->
+      <div class="field">
+        <label>Carrier:</label>
+        <input type="text" value="Aurora Cooperative" readonly>
+      </div>
+      <div class="field">
+        <label>Location:</label>
+        <input type="text" id="location" placeholder="Enter location...">
+      </div>
+
+      <!-- Date -->
+      <div style="background:#f0ece2; padding:12px 14px; border-radius:8px; margin:12px 0;">
+        <div style="font-weight:bold; color:#1a3a5c; margin-bottom:8px;">📅 Date</div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <button onclick="toggleAutoDate()" id="autoDateBtn" style="background:#ccc; border-radius:20px; padding:4px 13px; font-size:12px; font-weight:bold;">
+            ○ Auto Today's Date
+          </button>
+          <span style="font-size:12px; color:#999;">or type:</span>
+          <input type="text" id="date" placeholder="MM/DD/YYYY" style="width:130px;">
+        </div>
+      </div>
+
+      <!-- Times -->
+      <div style="background:#f0ece2; padding:12px 14px; border-radius:8px; margin-bottom:12px;">
+        <div style="font-weight:bold; color:#1a3a5c; margin-bottom:10px;">🕐 Trip Times</div>
+        <div id="timeRows"></div>
+      </div>
+
+      <!-- Tractor Info -->
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+        <div class="field">
+          <label>Tractor/Truck No.:</label>
+          <input type="text" id="tractorNo" style="width:110px;" placeholder="Number">
+        </div>
+        <div class="field">
+          <label>Odometer Begin:</label>
+          <input type="number" id="odometerBegin" style="width:90px;" placeholder="Miles">
+        </div>
+        <div class="field">
+          <label>Odometer End:</label>
+          <input type="number" id="odometerEnd" style="width:90px;" placeholder="Miles">
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><strong style="color:#1a3a5c;">Pre</strong> = Pre-Trip</span>
+        <span><strong style="color:#1a3a5c;">Post</strong> = Post-Trip</span>
+        <span><strong style="color:#b91c1c;">RR</strong> = Requires Repair</span>
+      </div>
+
+      <h2>🚛 Tractor / Truck Inspection</h2>
+      <div id="tractorChecks" style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;"></div>
+
+      <h2>🚚 Trailer(s) Inspection</h2>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin:10px 0;">
+        <div class="field">
+          <label>Trailer 1 No.:</label>
+          <input type="text" id="trailer1" style="width:110px;">
+        </div>
+        <div class="field">
+          <label>Trailer 2 No.:</label>
+          <input type="text" id="trailer2" style="width:110px;">
+        </div>
+      </div>
+      <div id="trailerChecks" style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;"></div>
+
+      <h2>📝 Remarks</h2>
+      <textarea id="remarks" placeholder="Enter any remarks or notes here..." style="width:100%; min-height:80px; padding:10px; border:2px solid #1a3a5c; border-radius:6px; font-family:Georgia,serif;"></textarea>
+
+      <h2>✅ Vehicle Condition</h2>
+      <div id="conditionChecks"></div>
+
+      <h2>✍️ Signatures</h2>
+      <div id="signatures"></div>
+
+      <button onclick="submitReport()" class="submit-btn">Submit Inspection Report →</button>
+    </div>
+  </div>
+
+  <script>
+    // Data Arrays
+    const TRACTOR_ITEMS = ["Air Compressor", "Air Lines", "Battery", "Belts and Hoses", "Body", "Brake Accessories", "Brakes, Parking", "Brakes, Service", "Clutch", "Coupling Devices", "Current Registration", "Defroster/Heater", "DOT Inspection Sticker", "Drive Line", "Engine", "Exhaust", "Fifth Wheel", "Fluid Levels", "Frame and Assembly", "Insurance Card", "Front Axle", "Fuel Gauge", "Fuel Tanks", "Generator/Alternator", "Horn", "Lights - Clearance", "Lights - Head/Stop", "Lights - Tail/Dash", "Lights - Turn Indicators", "Mirrors", "Muffler", "Oil Level", "Radiator Level", "Rear Axle", "Rear Impact Guards", "Reflectors", "Speedometer", "Safety Equipment - Fire Extinguisher", "Safety Equipment - Reflective Triangles", "Safety Equipment - Spare Fuses", "Starter", "Steering System", "Suspension System", "Tires 4/32, 2/32", "Transmission", "Wheels & Rims/Studs/Nuts", "Windows", "Windshield Wipers", "Other"];
+
+    const TRAILER_ITEMS = ["Brake Connections", "Brakes", "Coupling Devices", "Coupling (King) Pin", "Current Registration", "Doors", "DOT Inspection Sticker", "Hitch", "Working Brake Breakaway", "Landing Gear", "Lights - All", "Reflectors/Reflective Tape", "Roof", "Safety Chains", "Suspension System", "Rear Impact Guard", "Correct Straps", "Tarp", "Tires 2/32", "Wheels and Rims/Studs/Nuts", "Other"];
+
+    // Initialize Checkboxes
+    function createCheckboxGroup(items, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-group';
+        div.innerHTML = `
+          <div style="display:flex; gap:4px;">
+            <button onclick="toggleCheck('${containerId}', '${item}', 'Pre')" class="btn-small" id="${containerId}-${item}-Pre" title="Pre"> </button>
+            <button onclick="toggleCheck('${containerId}', '${item}', 'Post')" class="btn-small" id="${containerId}-${item}-Post" title="Post"> </button>
+            <button onclick="toggleCheck('${containerId}', '${item}', 'RR')" class="btn-small" id="${containerId}-${item}-RR" title="RR" style="border-color:#b91c1c;"> </button>
+          </div>
+          <span style="font-size:13px; color:#222;">${item}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function toggleCheck(containerId, item, type) {
+      const btn = document.getElementById(`${containerId}-${item}-${type}`);
+      const isActive = btn.style.backgroundColor !== '';
+      btn.style.backgroundColor = isActive ? '' : (type === 'RR' ? '#b91c1c' : '#1a3a5c');
+      btn.textContent = isActive ? '' : 'X';
+    }
+
+    // Auto Date
+    function toggleAutoDate() {
+      const btn = document.getElementById('autoDateBtn');
+      const input = document.getElementById('date');
+      if (btn.textContent.includes('○')) {
+        const today = new Date().toLocaleDateString('en-US');
+        input.value = today;
+        btn.innerHTML = '✓ Auto Today\'s Date';
+        btn.style.background = '#1a3a5c';
+        btn.style.color = 'white';
+      } else {
+        input.value = '';
+        btn.innerHTML = '○ Auto Today\'s Date';
+        btn.style.background = '#ccc';
+        btn.style.color = '';
+      }
+    }
+
+    // Signature Pad
+    function createSignaturePad(label, id) {
+      return `
+        <div style="margin-bottom:20px;">
+          <div style="font-size:13px; color:#1a3a5c; font-weight:bold; margin-bottom:6px;">${label}</div>
+          <canvas id="${id}" width="500" height="100" style="width:100%; max-width:500px; height:100px;"></canvas>
+          <button onclick="clearSignature('${id}')" style="margin-top:6px; padding:6px 12px; background:#888; color:white; font-size:12px;">Clear Signature</button>
+        </div>`;
+    }
+
+    let signatures = {};
+
+    function initSignature(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      let drawing = false;
+      let lastPos = null;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        return {
+          x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+          y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+        };
+      }
+
+      canvas.addEventListener('mousedown', e => { drawing = true; lastPos = getPos(e); });
+      canvas.addEventListener('mousemove', e => {
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.strokeStyle = '#1a3a5c';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(lastPos.x, lastPos.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        lastPos = pos;
+        signatures[canvasId] = canvas.toDataURL();
+      });
+      canvas.addEventListener('mouseup', () => drawing = false);
+      canvas.addEventListener('mouseleave', () => drawing = false);
+
+      // Touch support
+      canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; lastPos = getPos(e); });
+      canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.strokeStyle = '#1a3a5c';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(lastPos.x, lastPos.y);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        lastPos = pos;
+        signatures[canvasId] = canvas.toDataURL();
+      });
+      canvas.addEventListener('touchend', () => drawing = false);
+    }
+
+    function clearSignature(id) {
+      const canvas = document.getElementById(id);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      delete signatures[id];
+    }
+
+    // Submit
+    function submitReport() {
+      alert("Report Submitted!\n\nYou can now download the HTML report or email it.");
+      // You can extend this to show the post-submission screen
+      window.scrollTo(0, 0);
+    }
+
+    // Initialize everything
+    window.onload = () => {
+      createCheckboxGroup(TRACTOR_ITEMS, 'tractorChecks');
+      createCheckboxGroup(TRAILER_ITEMS, 'trailerChecks');
+
+      document.getElementById('signatures').innerHTML = 
+        createSignaturePad("Driver's Signature", 'driverSig') +
+        createSignaturePad("Mechanic's Signature", 'mechanicSig') +
+        createSignaturePad("Driver Review Signature", 'driverSig2');
+
+      // Initialize canvases
+      setTimeout(() => {
+        initSignature('driverSig');
+        initSignature('mechanicSig');
+        initSignature('driverSig2');
+      }, 300);
+    };
+  </script>
+</body>
+</html>
